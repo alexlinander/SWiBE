@@ -1,0 +1,13 @@
+librosa==0.9.1
+matplotlib==3.5.1
+numpy==1.21.6
+pesq==0.0.4
+PySoundFile==0.9.0.post1
+pystoi==0.3.3
+pytorch_lightning==2.1.0
+scipy==1.8.1
+SoundFile==0.10.3.post1
+torch==1.12.0
+torch_ema==0.3
+torchaudio==2.1.2
+tqdm==4.64.0
