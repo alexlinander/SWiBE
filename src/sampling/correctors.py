@@ -1,32 +1,5 @@
-import abc
 import torch
-
 from src import sdes
-
-# class Corrector(abc.ABC):
-#     """The abstract class for a corrector algorithm."""
-
-#     def __init__(self, sde, score_fn, snr, n_steps):
-#         super().__init__()
-#         self.rsde = sde.reverse(score_fn)
-#         self.score_fn = score_fn
-#         self.snr = snr
-#         self.n_steps = n_steps
-
-#     @abc.abstractmethod
-#     def update_fn(self, x, t, *args):
-#         """One update of the corrector.
-
-#         Args:
-#             x: A PyTorch tensor representing the current state
-#             t: A PyTorch tensor representing the current time step.
-#             *args: Possibly additional arguments, in particular `y` for OU processes
-
-#         Returns:
-#             x: A PyTorch tensor of the next state.
-#             x_mean: A PyTorch tensor. The next state without random noise. Useful for denoising.
-#         """
-#         pass
 
 class AnnealedLangevinDynamics():
     """The original annealed Langevin dynamics predictor in NCSN/NCSNv2."""
