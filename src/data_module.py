@@ -96,7 +96,7 @@ class Specs(Dataset):
             # for debugging shrink the data set size
             return int(len(self.clean_files)/200)
         else:
-            return len(self.clean_files)//10
+            return len(self.clean_files)
 
 
 class SpecsDataModule(pl.LightningDataModule):

@@ -261,7 +261,7 @@ class ScoreModel(pl.LightningModule):
         else:
             return x_hat
         
-    def plot(self, model_name, alpha=0.03, gamma=10):
+    def plot(self, model_name, alpha=0.03, lambda_=10):
         timesteps = torch.linspace(1, self.t_eps, 30)
         t = range(0,30)
         y_major_loator = plt.MultipleLocator(2)
@@ -273,7 +273,7 @@ class ScoreModel(pl.LightningModule):
         ax1.set_ylabel('value')  # we already handled the x-label with ax1
         ax1.set_xlabel('steps(t)')
 
-        line = self.sde.band_step(timesteps, gamma, self.t_eps)*(1/self.sde.band_step(alpha, gamma, self.t_eps)) 
+        line = self.sde.band_step(timesteps, lambda_, self.t_eps)*(1/self.sde.band_step(alpha, lambda_, self.t_eps)) 
         line = torch.asarray([1 if b > 1 else b for b in line ])
         # line = line*0.25
         print("bandwidth step :",np.asarray(line))
@@ -291,5 +291,5 @@ class ScoreModel(pl.LightningModule):
         ax2.set_ylim(8,16.5)
         ax2.yaxis.set_major_locator(y_major_loator)
 
-        plt.title(r"$ \alpha $=" + str(alpha) + r"$,\gamma$=" + str(gamma))
+        plt.title(r"$ \alpha $=" + str(alpha) + r"$,\lambda$=" + str(lambda_))
         plt.savefig(f"Bstep_plt/{model_name}.png" , dpi=300, format = 'png')

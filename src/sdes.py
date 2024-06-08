@@ -12,50 +12,50 @@ class OUVESDE():
     @staticmethod
     def add_argparse_args(parser):
         parser.add_argument("--sde-n", type=int, default=1000, help="The number of timesteps in the SDE discretization. 30 by default")
-        parser.add_argument("--theta", type=float, default=1.5, help="The constant stiffness of the Ornstein-Uhlenbeck process. 1.5 by default.")
+        parser.add_argument("--gamma", type=float, default=1.5, help="The constant stiffness of the Ornstein-Uhlenbeck process. 1.5 by default.")
         parser.add_argument("--sigma-min", type=float, default=0.05, help="The minimum sigma to use. 0.05 by default.")
         parser.add_argument("--sigma-max", type=float, default=0.5, help="The maximum sigma to use. 0.5 by default.")
-        parser.add_argument("--alpha", type=float, default=0.03, help="param control the expansion saturation time, 0 < alpha <= 1")
-        parser.add_argument("--gamma", type=float, default=0, help="param control the expansion start point, 0 <= gamma")
+        parser.add_argument("--Alpha", type=float, default=0.03, help="param control the expansion saturation time, 0 < alpha <= 1")
+        parser.add_argument("--Lambda", type=float, default=0, help="param control the expansion start point, 0 <= lambda")
         return parser
 
-    def __init__(self, t_eps, theta, sigma_min, sigma_max, alpha=0.03, gamma=10, N=1000, **ignored_kwargs):
+    def __init__(self, t_eps, gamma, sigma_min, sigma_max, alpha=0.03, lambda_=10, N=1000, **ignored_kwargs):
         """Construct an Ornstein-Uhlenbeck Variance Exploding SDE.
 
         Note that the "steady-state mean" `y` is not provided at construction, but must rather be given as an argument
         to the methods which require it (e.g., `sde` or `marginal_prob`).
 
-        dx = -theta (y-x) dt + sigma(t) dw
+        dx = -gamma (y-x) dt + sigma(t) dw
 
         with
 
         sigma(t) = sigma_min (sigma_max/sigma_min)^t * sqrt(2 log(sigma_max/sigma_min))
 
         Args:
-            theta: stiffness parameter.
+            gamma: stiffness parameter.
             sigma_min: smallest sigma.
             sigma_max: largest sigma.
             N: number of discretization steps
         """
         super().__init__()
-        self.theta = theta
+        self.gamma = gamma
         self.sigma_min = sigma_min
         self.sigma_max = sigma_max
         self.alpha = alpha
-        self.gamma = gamma
+        self.lambda_ = lambda_
         self.t_eps = t_eps
         self.logsig = np.log(self.sigma_max / self.sigma_min)
         self.N = N
 
     def copy(self):
-        return OUVESDE(self.t_eps, self.theta, self.sigma_min, self.sigma_max, self.alpha, self.gamma, N=self.N)
+        return OUVESDE(self.t_eps, self.gamma, self.sigma_min, self.sigma_max, self.alpha, self.lambda_, N=self.N)
 
     @property
     def T(self):
         return 1
 
     def sde(self, x, t, y):
-        drift = self.theta * (y - x)
+        drift = self.gamma * (y - x)
 
         # the sqrt(2*logsig) factor is required here so that logsig does not in the end affect the perturbation kernel
         # standard deviation. this can be understood from solving the integral of [exp(2s) * g(s)^2] from s=0 to t
@@ -67,24 +67,24 @@ class OUVESDE():
         return drift, diffusion
 
     def _mean(self, x0, t, y):
-        theta = self.theta
-        exp_interp = torch.exp(-theta * t)[:, None, None, None]
+        gamma = self.gamma
+        exp_interp = torch.exp(-gamma * t)[:, None, None, None]
 
         return self.mask((exp_interp * x0 + (1 - exp_interp) * y), t)
 
     def _std(self, t):
         # This is a full solution to the ODE for P(t) in our derivations, after choosing g(s) as in self.sde()
-        sigma_min, theta, logsig = self.sigma_min, self.theta, self.logsig
+        sigma_min, gamma, logsig = self.sigma_min, self.gamma, self.logsig
         # could maybe replace the two torch.exp(... * t) terms here by cached values **t
         return torch.sqrt(
             (
                 sigma_min**2
-                * torch.exp(-2 * theta * t)
-                * (torch.exp(2 * (theta + logsig) * t) - 1)
+                * torch.exp(-2 * gamma * t)
+                * (torch.exp(2 * (gamma + logsig) * t) - 1)
                 * logsig
             )
             /
-            (theta + logsig)
+            (gamma + logsig)
         )
     
     def band_step(self, timestep, bias, t_eps):
@@ -97,7 +97,7 @@ class OUVESDE():
         mask = torch.ones_like(spec)
         _,_,f,_ = mask.size()
         
-        band_step = self.band_step(t, self.gamma, self.t_eps)*(1/self.band_step(self.alpha, self.gamma, self.t_eps))
+        band_step = self.band_step(t, self.lambda_, self.t_eps)*(1/self.band_step(self.alpha, self.lambda_, self.t_eps))
         band_step = torch.asarray([1 if b > 1 else b for b in band_step ])
 
         for i, (bia, b) in enumerate(zip(bias, band_step)):
@@ -107,7 +107,7 @@ class OUVESDE():
         return spec*mask
     
     def get_step(self, t):
-        band_step = self.band_step(t, self.gamma, self.t_eps)*(1/self.band_step(self.alpha, self.gamma, self.t_eps))
+        band_step = self.band_step(t, self.lambda_, self.t_eps)*(1/self.band_step(self.alpha, self.lambda_, self.t_eps))
         return torch.asarray([1 if b > 1 else b for b in band_step ])
     
     def marginal_prob(self, x0, t, y):

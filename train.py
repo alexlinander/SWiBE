@@ -44,10 +44,10 @@ if __name__ == '__main__':
      args = parser.parse_args()
      arg_groups = get_argparse_groups(parser)
 
-     alpha = args.alpha
-     gamma = args.gamma
+     alpha = args.Alpha
+     lambda_ = args.Lambda
      save_dir = args.save_dir
-     model_name = args.model_name+"_alpha={}_gamma={}".format(alpha, gamma)
+     model_name = args.model_name+"_alpha={}_lambda={}".format(alpha, lambda_)
 
 
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
           }
      )
 
-     model.plot(model_name, alpha, gamma)
+     model.plot(model_name, alpha, lambda_)
      logger = TensorBoardLogger(save_dir=f"{save_dir}/logs/{model_name}", name="tensorboard")
 
 
