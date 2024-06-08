@@ -33,4 +33,4 @@ python enhancement.py --test_dir <testset_dir> --enhanced_dir <enhanced_wav_dir>
 Note: <testset_dir> should direct to `<dataset_dir>/test`
 
 ## Acknowledgement
-We would like to thank the authors and contributors of the [sgmse](https://github.com/sp-uhh/sgmse), whose code and resources significantly helped in the development of this project.
+We would like to thank the authors and contributors of the repository [sgmse](https://github.com/sp-uhh/sgmse), whose code and resources significantly helped in the development of this project.
