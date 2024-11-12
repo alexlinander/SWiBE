@@ -34,3 +34,16 @@ Note: <testset_dir> should direct to `<dataset_dir>/test`
 
 ## Acknowledgement
 We would like to thank the authors and contributors of the repository [sgmse](https://github.com/sp-uhh/sgmse), whose code and resources significantly helped in the development of this project.
+
+## Citation
+```
+@inproceedings{lin24c_interspeech,
+  title     = {SWiBE: A Parameterized Stochastic Diffusion Process for Noise-Robust Bandwidth Expansion},
+  author    = {Yin-Tse Lin and Shreya G. Upadhyay and Bo-Hao Su and Chi-Chun Lee},
+  year      = {2024},
+  booktitle = {Interspeech 2024},
+  pages     = {2265--2269},
+  doi       = {10.21437/Interspeech.2024-463},
+  issn      = {2958-1796},
+}
+```
